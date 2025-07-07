@@ -9,26 +9,30 @@ app = Flask(__name__)
 def extract_metadata(url):
     headers = {"User-Agent": "Mozilla/5.0"}
     res = requests.get(url, headers=headers, timeout=10)
+    final_url = res.url  # Handle redirects
     soup = BeautifulSoup(res.text, 'html.parser')
 
     def meta_content(name):
         tag = soup.find("meta", property=name) or soup.find("meta", attrs={"name": name})
         return tag["content"].strip() if tag and "content" in tag.attrs else None
 
-    parsed = urlparse(url)
-    # base_url = f"{parsed.scheme}://{parsed.netloc}"
+    def extract_images():
+        og_image = meta_content("og:image")
+        if og_image:
+            return [og_image]
+        # Fallback to first <img>
+        img_tag = soup.find("img")
+        if img_tag and "src" in img_tag.attrs:
+            return [urljoin(final_url, img_tag["src"])]
+        return []
 
-    # favicon_tag = soup.find("link", rel=lambda x: x and "icon" in x.lower())
-    # favicon = urljoin(base_url, favicon_tag["href"]) if favicon_tag and "href" in favicon_tag.attrs else None
+    parsed = urlparse(final_url)
 
     return {
-        "title": soup.title.string.strip() if soup.title else meta_content("og:title"),
+        "title": soup.title.string.strip() if soup.title and soup.title.string else meta_content("og:title"),
         "description": meta_content("description") or meta_content("og:description"),
-        "images": [meta_content("og:image")] if meta_content("og:image") else [],
-        # "sitename": meta_content("og:site_name") or parsed.netloc,
-        # "favicon": favicon,
-        # "domain": parsed.netloc,
-        "url": url
+        "images": extract_images(),
+        "url": final_url
     }
 
 @app.route("/metadata", methods=["POST"])
