@@ -15,7 +15,7 @@ def extract_metadata(url):
         tag = soup.find("meta", property=name) or soup.find("meta", attrs={"name": name})
         return tag["content"].strip() if tag and "content" in tag.attrs else None
 
-    # parsed = urlparse(url)
+    parsed = urlparse(url)
     # base_url = f"{parsed.scheme}://{parsed.netloc}"
 
     # favicon_tag = soup.find("link", rel=lambda x: x and "icon" in x.lower())
@@ -25,7 +25,7 @@ def extract_metadata(url):
         "title": soup.title.string.strip() if soup.title else meta_content("og:title"),
         "description": meta_content("description") or meta_content("og:description"),
         "images": [meta_content("og:image")] if meta_content("og:image") else [],
-        # "sitename": meta_content("og:site_name") or parsed.netloc,
+        "sitename": meta_content("og:site_name") or parsed.netloc,
         # "favicon": favicon,
         # "domain": parsed.netloc,
         "url": url
