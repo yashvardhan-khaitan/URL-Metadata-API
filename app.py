@@ -13,14 +13,18 @@ def extract_metadata(url):
     soup = BeautifulSoup(res.text, 'html.parser')
 
     def meta_content(name):
-        tag = soup.find("meta", property=name) or soup.find("meta", attrs={"name": name})
+    
+        tag = soup.find(lambda tag: tag.name == 'meta' and (
+            tag.get('property', '').lower() == name.lower() or
+            tag.get('name', '').lower() == name.lower()
+        ))
         return tag["content"].strip() if tag and "content" in tag.attrs else None
 
     def extract_images():
         og_image = meta_content("og:image")
         if og_image:
             return [og_image]
-        # Fallback to first <img>
+
         img_tag = soup.find("img")
         if img_tag and "src" in img_tag.attrs:
             return [urljoin(final_url, img_tag["src"])]
