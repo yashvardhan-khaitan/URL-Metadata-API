@@ -25,7 +25,7 @@ def extract_metadata(url):
         "title": soup.title.string.strip() if soup.title else meta_content("og:title"),
         "description": meta_content("description") or meta_content("og:description"),
         "images": [meta_content("og:image")] if meta_content("og:image") else [],
-        "sitename": meta_content("og:site_name") or parsed.netloc,
+        # "sitename": meta_content("og:site_name") or parsed.netloc,
         # "favicon": favicon,
         # "domain": parsed.netloc,
         "url": url
