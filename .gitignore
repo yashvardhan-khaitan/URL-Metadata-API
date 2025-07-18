@@ -82,3 +82,4 @@ package-lock.json
 
 # Firebase
 firebase_credentials.json
+.vercel
